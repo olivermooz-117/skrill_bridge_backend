@@ -1,8 +1,7 @@
 from flask import Blueprint, request, jsonify
-from flask_jwt_extended import create_access_token, get_jwt_identity, jwt_required
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
 from app.models.user import User
 from app.extensions import db
-import re
 
 auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
@@ -10,19 +9,12 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 def register():
     data = request.get_json()
     
-    # Validate required fields
-    if not all(k in data for k in ('name', 'email', 'password', 'role')):
+    if not data or not all(k in data for k in ('name', 'email', 'password', 'role')):
         return jsonify({'error': 'Missing required fields'}), 400
     
-    # Validate email
-    if not re.match(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$', data['email']):
-        return jsonify({'error': 'Invalid email format'}), 400
-    
-    # Check if user exists
     if User.query.filter_by(email=data['email']).first():
         return jsonify({'error': 'Email already registered'}), 409
     
-    # Create user
     user = User(
         name=data['name'],
         email=data['email'],
@@ -34,18 +26,16 @@ def register():
     db.session.add(user)
     db.session.commit()
     
-    tokens = user.get_tokens()
     return jsonify({
         'message': 'User registered successfully',
-        'user': user.to_dict(),
-        **tokens
+        'user': user.to_dict()
     }), 201
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
     
-    if not data.get('email') or not data.get('password'):
+    if not data or not data.get('email') or not data.get('password'):
         return jsonify({'error': 'Email and password required'}), 400
     
     user = User.query.filter_by(email=data['email']).first()
@@ -53,22 +43,13 @@ def login():
     if not user or not user.check_password(data['password']):
         return jsonify({'error': 'Invalid credentials'}), 401
     
-    if not user.is_active:
-        return jsonify({'error': 'Account is deactivated'}), 403
+    access_token = create_access_token(identity=user.id)
     
-    tokens = user.get_tokens()
     return jsonify({
         'message': 'Login successful',
-        'user': user.to_dict(),
-        **tokens
+        'access_token': access_token,
+        'user': user.to_dict()
     }), 200
-
-@auth_bp.route('/refresh', methods=['POST'])
-@jwt_required(refresh=True)
-def refresh():
-    current_user_id = get_jwt_identity()
-    new_access_token = create_access_token(identity=current_user_id)
-    return jsonify({'access_token': new_access_token}), 200
 
 @auth_bp.route('/me', methods=['GET'])
 @jwt_required()
@@ -92,16 +73,12 @@ def request_password_reset():
         return jsonify({'error': 'Email not found'}), 404
     
     # In production, send email with reset link
-    # For demo, we'll return a dummy token
     reset_token = create_access_token(identity=user.id, expires_delta=False)
-    
-    # Log the reset link (in production, send via email)
-    reset_link = f"{Config.FRONTEND_URL}/password-reset/confirm?token={reset_token}"
-    print(f"Password reset link: {reset_link}")
+    reset_link = f"{app.config.get('FRONTEND_URL', 'http://localhost:3000')}/password-reset/confirm?token={reset_token}"
     
     return jsonify({
-        'message': 'Password reset link sent to your email',
-        'reset_link': reset_link  # Only for demo purposes
+        'message': 'Password reset link sent',
+        'reset_link': reset_link  # Only for demo
     }), 200
 
 @auth_bp.route('/password-reset/confirm', methods=['POST'])
@@ -129,7 +106,5 @@ def confirm_password_reset():
         db.session.commit()
         
         return jsonify({'message': 'Password reset successful'}), 200
-    except Exception as e:
+    except Exception:
         return jsonify({'error': 'Invalid or expired token'}), 400
-
-from app.config import Config
