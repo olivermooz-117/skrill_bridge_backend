@@ -14,7 +14,20 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     jwt.init_app(app)
-    cors.init_app(app, origins=app.config.get('FRONTEND_URL', '*'))
+    
+    # Configure CORS to allow all origins (for development)
+    cors.init_app(app, resources={
+        r"/api/*": {
+            "origins": "*",
+            "methods": ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+            "allow_headers": ["Content-Type", "Authorization", "Accept"],
+            "supports_credentials": True
+        },
+        r"/health": {
+            "origins": "*",
+            "methods": ["GET"]
+        }
+    })
     
     # Register blueprints
     app.register_blueprint(auth_bp)
