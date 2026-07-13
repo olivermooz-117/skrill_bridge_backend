@@ -8,15 +8,9 @@ class Config:
     JWT_SECRET_KEY = os.environ.get('JWT_SECRET_KEY', 'jwt-secret-key')
     JWT_ACCESS_TOKEN_EXPIRES = timedelta(days=1)
     JWT_REFRESH_TOKEN_EXPIRES = timedelta(days=30)
-    FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5175')
+    FRONTEND_URL = os.environ.get('FRONTEND_URL', 'http://localhost:5174')
     
     # CORS settings
-    CORS_ORIGINS = [
-        'http://localhost:3000',
-        'http://localhost:5173',
-        'http://localhost:5174',
-        'http://localhost:5175',
-        'http://127.0.0.1:5173',
-        'http://127.0.0.1:5174',
-        'http://127.0.0.1:5175',
-    ]
+    CORS_ORIGINS = ['*']
+    CORS_METHODS = ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS', 'PATCH']
+    CORS_HEADERS = ['Content-Type', 'Authorization', 'Accept', 'X-Requested-With']

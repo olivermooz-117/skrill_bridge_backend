@@ -27,19 +27,20 @@ class Gig(db.Model):
     def to_dict(self):
         return {
             'id': self.id,
-            'title': self.title,
-            'description': self.description,
-            'price': self.price,
-            'delivery_days': self.delivery_days,
+            'title': str(self.title) if self.title else '',
+            'description': str(self.description) if self.description else '',
+            'price': float(self.price) if self.price else 0,
+            'delivery_days': int(self.delivery_days) if self.delivery_days else 0,
             'user_id': self.user_id,
             'freelancer': self.freelancer.to_dict() if self.freelancer else None,
-            'tags': [tag.to_dict() for tag in self.tags],
-            'is_active': self.is_active,
+            'tags': [tag.to_dict() for tag in self.tags] if self.tags else [],
+            'is_active': bool(self.is_active),
             'created_at': self.created_at.isoformat() if self.created_at else None,
-            'average_rating': self.get_average_rating()
+            'updated_at': self.updated_at.isoformat() if self.updated_at else None
         }
     
     def get_average_rating(self):
+        from app.models.order import Order
         orders = Order.query.filter_by(gig_id=self.id, status='completed').all()
         if not orders:
             return None

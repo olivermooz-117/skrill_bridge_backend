@@ -1,22 +1,26 @@
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, make_response
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models.user import User
 from app.extensions import db
 
 users_bp = Blueprint('users', __name__, url_prefix='/api/users')
 
-@users_bp.route('/<int:user_id>', methods=['GET'])
+@users_bp.route('/<int:user_id>', methods=['GET', 'OPTIONS'])
 def get_user(user_id):
-    """GET endpoint: Get user profile"""
+    if request.method == 'OPTIONS':
+        return make_response(), 200
+    
     user = User.query.get(user_id)
     if not user:
         return jsonify({'error': 'User not found'}), 404
     return jsonify(user.to_dict()), 200
 
-@users_bp.route('/<int:user_id>', methods=['PUT'])
+@users_bp.route('/<int:user_id>', methods=['PUT', 'OPTIONS'])
 @jwt_required()
 def update_user(user_id):
-    """PUT endpoint: Update user profile"""
+    if request.method == 'OPTIONS':
+        return make_response(), 200
+    
     current_user_id = get_jwt_identity()
     
     if current_user_id != user_id:
@@ -42,10 +46,12 @@ def update_user(user_id):
         'user': user.to_dict()
     }), 200
 
-@users_bp.route('/<int:user_id>', methods=['DELETE'])
+@users_bp.route('/<int:user_id>', methods=['DELETE', 'OPTIONS'])
 @jwt_required()
 def delete_user(user_id):
-    """DELETE endpoint: Delete user account"""
+    if request.method == 'OPTIONS':
+        return make_response(), 200
+    
     current_user_id = get_jwt_identity()
     
     if current_user_id != user_id:
@@ -55,7 +61,6 @@ def delete_user(user_id):
     if not user:
         return jsonify({'error': 'User not found'}), 404
     
-    # Soft delete
     user.is_active = False
     db.session.commit()
     

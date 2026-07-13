@@ -1,3 +1,16 @@
+.debug-info {
+  background: #edf2f7;
+  color: #2d3748;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  font-size: 0.85rem;
+  font-family: monospace;
+  word-break: break-all;
+  border-left: 4px solid #4a5568;
+  max-height: 100px;
+  overflow: auto;
+}
+
 .create-gig-page {
   padding: 2rem 0;
 }
@@ -43,6 +56,23 @@
   color: #c53030;
   padding: 0.75rem 1rem;
   border-radius: 8px;
+  border-left: 4px solid #c53030;
+}
+
+.form-success {
+  background: #c6f6d5;
+  color: #22543d;
+  padding: 0.75rem 1rem;
+  border-radius: 8px;
+  border-left: 4px solid #22543d;
+}
+
+.char-count {
+  display: block;
+  text-align: right;
+  font-size: 0.8rem;
+  color: #718096;
+  margin-top: 0.25rem;
 }
 
 .tag-input-container {
@@ -75,8 +105,13 @@
   transition: background 0.3s ease;
 }
 
-.tag-add-btn:hover {
+.tag-add-btn:hover:not(:disabled) {
   background: #5a67d8;
+}
+
+.tag-add-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
 .tags-display {
@@ -84,6 +119,7 @@
   gap: 0.5rem;
   flex-wrap: wrap;
   margin-top: 0.5rem;
+  min-height: 2rem;
 }
 
 .tag-item {
@@ -109,8 +145,18 @@
   line-height: 1;
 }
 
-.tag-remove:hover {
+.tag-remove:hover:not(:disabled) {
   color: #5a67d8;
+}
+
+.tag-remove:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.no-tags {
+  color: #a0aec0;
+  font-size: 0.9rem;
 }
 
 .submit-btn {

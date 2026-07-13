@@ -9,19 +9,31 @@ const api = axios.create({
   },
 });
 
-// Add token to requests
-api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('access_token');
-  if (token) {
-    config.headers.Authorization = `Bearer ${token}`;
+// Request interceptor - Add token to every request
+api.interceptors.request.use(
+  (config) => {
+    const token = localStorage.getItem('access_token');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    console.log(`📤 ${config.method.toUpperCase()} ${config.url}`, config.data);
+    return config;
+  },
+  (error) => {
+    console.error('Request error:', error);
+    return Promise.reject(error);
   }
-  return config;
-});
+);
 
-// Handle token refresh
+// Response interceptor - Handle errors
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    console.log(`📥 Response from ${response.config.url}:`, response.status);
+    return response;
+  },
   async (error) => {
+    console.error('Response error:', error.response?.status, error.response?.data);
+    
     const originalRequest = error.config;
     
     if (error.response?.status === 401 && !originalRequest._retry) {
@@ -39,12 +51,15 @@ api.interceptors.response.use(
           originalRequest.headers.Authorization = `Bearer ${access_token}`;
           return api(originalRequest);
         } catch (refreshError) {
+          console.error('Refresh token failed:', refreshError);
           localStorage.removeItem('access_token');
           localStorage.removeItem('refresh_token');
           window.location.href = '/login';
+          return Promise.reject(refreshError);
         }
       }
     }
+    
     return Promise.reject(error);
   }
 );
