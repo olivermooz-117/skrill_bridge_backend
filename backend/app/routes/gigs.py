@@ -4,6 +4,7 @@ from app.models.gig import Gig
 from app.models.tag import Tag
 from app.models.user import User
 from app.extensions import db
+from app.utils.decorators import role_required
 
 gigs_bp = Blueprint('gigs', __name__, url_prefix='/api/gigs')
 
