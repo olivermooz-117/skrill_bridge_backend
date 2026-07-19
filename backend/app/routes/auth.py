@@ -8,7 +8,12 @@ auth_bp = Blueprint('auth', __name__, url_prefix='/api/auth')
 
 @auth_bp.route('/register', methods=['POST'])
 def register():
+    # Get JSON data
     data = request.get_json()
+    
+    # Check if data exists
+    if not data:
+        return jsonify({'error': 'No JSON data provided'}), 400
     
     # Validate required fields
     if not all(k in data for k in ('name', 'email', 'password', 'role')):
@@ -34,16 +39,20 @@ def register():
     db.session.add(user)
     db.session.commit()
     
-    tokens = user.get_tokens()
+    access_token = create_access_token(identity=user.id)
+    
     return jsonify({
         'message': 'User registered successfully',
         'user': user.to_dict(),
-        **tokens
+        'access_token': access_token
     }), 201
 
 @auth_bp.route('/login', methods=['POST'])
 def login():
     data = request.get_json()
+    
+    if not data:
+        return jsonify({'error': 'No JSON data provided'}), 400
     
     if not data.get('email') or not data.get('password'):
         return jsonify({'error': 'Email and password required'}), 400
@@ -56,19 +65,13 @@ def login():
     if not user.is_active:
         return jsonify({'error': 'Account is deactivated'}), 403
     
-    tokens = user.get_tokens()
+    access_token = create_access_token(identity=user.id)
+    
     return jsonify({
         'message': 'Login successful',
         'user': user.to_dict(),
-        **tokens
+        'access_token': access_token
     }), 200
-
-@auth_bp.route('/refresh', methods=['POST'])
-@jwt_required(refresh=True)
-def refresh():
-    current_user_id = get_jwt_identity()
-    new_access_token = create_access_token(identity=current_user_id)
-    return jsonify({'access_token': new_access_token}), 200
 
 @auth_bp.route('/me', methods=['GET'])
 @jwt_required()
@@ -82,6 +85,10 @@ def get_current_user():
 @auth_bp.route('/password-reset/request', methods=['POST'])
 def request_password_reset():
     data = request.get_json()
+    
+    if not data:
+        return jsonify({'error': 'No JSON data provided'}), 400
+    
     email = data.get('email')
     
     if not email:
@@ -91,22 +98,21 @@ def request_password_reset():
     if not user:
         return jsonify({'error': 'Email not found'}), 404
     
-    # In production, send email with reset link
-    # For demo, we'll return a dummy token
     reset_token = create_access_token(identity=user.id, expires_delta=False)
-    
-    # Log the reset link (in production, send via email)
-    reset_link = f"{Config.FRONTEND_URL}/password-reset/confirm?token={reset_token}"
-    print(f"Password reset link: {reset_link}")
+    reset_link = f"http://localhost:5173/password-reset/confirm?token={reset_token}"
     
     return jsonify({
-        'message': 'Password reset link sent to your email',
-        'reset_link': reset_link  # Only for demo purposes
+        'message': 'Password reset link sent',
+        'reset_link': reset_link
     }), 200
 
 @auth_bp.route('/password-reset/confirm', methods=['POST'])
 def confirm_password_reset():
     data = request.get_json()
+    
+    if not data:
+        return jsonify({'error': 'No JSON data provided'}), 400
+    
     token = data.get('token')
     new_password = data.get('new_password')
     
@@ -131,5 +137,3 @@ def confirm_password_reset():
         return jsonify({'message': 'Password reset successful'}), 200
     except Exception as e:
         return jsonify({'error': 'Invalid or expired token'}), 400
-
-from app.config import Config
