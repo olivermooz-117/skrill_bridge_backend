@@ -1,0 +1,70 @@
+// SkillBridge Frontend Architecture
+
+// App Structure
+App {
+  AuthProvider
+  BrowserRouter
+  Routes
+}
+
+// Public Routes (No Auth Required)
+PublicRoutes {
+  "/" -> Landing
+  "/login" -> Login
+  "/register" -> Register
+  "/password-reset" -> PasswordResetRequest
+  "/password-reset/confirm" -> PasswordResetConfirm
+  "/gigs/:id" -> GigDetail
+}
+
+// Protected Routes (Auth Required)
+ProtectedRoutes {
+  "/dashboard" -> Dashboard
+  "/profile" -> Profile
+  "/orders" -> MyOrders
+  "/gigs/new" -> CreateGig (Freelancer only)
+  "/gigs/:id/edit" -> EditGig (Freelancer only)
+}
+
+// Components
+Components {
+  Navbar
+  Footer
+  ProtectedRoute
+  GigCard
+  GigList
+  AuthForm
+  LoadingSpinner
+  SearchBar
+  Pagination
+  OrderCard
+  StatsCard
+}
+
+// Context/State Management
+Context {
+  AuthContext {
+    user
+    loading
+    login()
+    register()
+    logout()
+    isAuthenticated
+    isFreelancer
+    isClient
+  }
+}
+
+// API Service
+APIService {
+  BaseURL: "/api"
+  AxiosInterceptors {
+    Request: Add JWT token
+    Response: Handle errors
+  }
+}
+
+// Data Flow
+DataFlow {
+  User -> Action -> API -> Response -> State -> UI
+}

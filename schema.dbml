@@ -1,0 +1,70 @@
+// SkillBridge Database Schema
+
+Table users {
+  id integer [pk, increment]
+  name varchar(100) [not null]
+  email varchar(120) [not null, unique]
+  password_hash varchar(128) [not null]
+  role varchar(20) [not null, default: 'client']
+  bio text
+  profile_picture varchar(255)
+  is_active boolean [default: true]
+  created_at datetime [default: `now()`]
+  updated_at datetime [default: `now()`]
+}
+
+Table gigs {
+  id integer [pk, increment]
+  title varchar(200) [not null]
+  description text [not null]
+  price float [not null]
+  delivery_days integer [not null]
+  user_id integer [not null, ref: > users.id]
+  is_active boolean [default: true]
+  created_at datetime [default: `now()`]
+  updated_at datetime [default: `now()`]
+}
+
+Table orders {
+  id integer [pk, increment]
+  gig_id integer [not null, ref: > gigs.id]
+  client_id integer [not null, ref: > users.id]
+  status varchar(20) [not null, default: 'pending']
+  total_price float [not null]
+  requirements text
+  created_at datetime [default: `now()`]
+  updated_at datetime [default: `now()`]
+}
+
+Table reviews {
+  id integer [pk, increment]
+  order_id integer [not null, unique, ref: > orders.id]
+  rating integer [not null]
+  comment text
+  created_at datetime [default: `now()`]
+}
+
+Table tags {
+  id integer [pk, increment]
+  name varchar(50) [not null, unique]
+  created_at datetime [default: `now()`]
+}
+
+Table gig_tags {
+  gig_id integer [pk, ref: > gigs.id]
+  tag_id integer [pk, ref: > tags.id]
+}
+
+// Enum for user roles
+Enum user_role {
+  client
+  freelancer
+}
+
+// Enum for order status
+Enum order_status {
+  pending
+  in_progress
+  completed
+  cancelled
+}

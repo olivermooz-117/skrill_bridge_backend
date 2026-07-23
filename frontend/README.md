@@ -1,42 +1,61 @@
-# SkillBridge - Freelance Marketplace
+React single-page application for the SkillBridge freelance marketplace platform.
 
-A full-stack freelance marketplace where users can list, browse, and book skill-based services. Freelancers create gigs, clients place orders and leave reviews, with JWT-secured accounts and password reset support.
+## Features
 
-##  Features
+- User authentication (login, register, logout)
+- Browse and search gigs
+- Create and manage gigs (freelancers only)
+- Place and track orders (clients only)
+- Leave reviews and ratings
+- User profile management
+- Password reset flow
+- Protected routes
+- Responsive design
 
-- **User Authentication**: JWT-based authentication with login, registration, and password reset
-- **Gig Management**: Create, read, update, and delete service listings
-- **Order System**: Place orders, track status, and cancel orders
-- **Reviews**: Rate and review completed orders
-- **Search & Filter**: Search gigs by title, tags, and price range
-- **Role-Based Access**: Separate interfaces for freelancers and clients
-- **Responsive Design**: Works on desktop, tablet, and mobile
+## Tech Stack
 
-##  Tech Stack
-
-### Backend
-- Flask 2.3.3
-- SQLAlchemy (ORM)
-- Flask-JWT-Extended (Authentication)
-- PostgreSQL (Production) / SQLite (Development)
-- Flask-CORS
-- Flask-Migrate
-
-### Frontend
 - React 18.2.0
-- React Router v6
-- Axios (HTTP Client)
-- CSS3 (Custom styling)
+- React Router 6.20.0
+- Vite 5.0.8
+- Axios 1.6.0
+- CSS3
 
-##  Prerequisites
+## Pages and Routes
 
-- Python 3.8+
-- Node.js 16+
-- PostgreSQL (optional, SQLite works for development)
+| Route | Page | Protected |
+|-------|------|-----------|
+| `/` | Landing / Browse Gigs | No |
+| `/login` | Login | No |
+| `/register` | Register | No |
+| `/password-reset` | Password Reset Request | No |
+| `/password-reset/confirm` | Password Reset Confirm | No |
+| `/gigs/:id` | Gig Detail | No |
+| `/dashboard` | Dashboard | Yes |
+| `/profile` | Profile | Yes |
+| `/orders` | My Orders | Yes |
+| `/gigs/new` | Create Gig | Yes (Freelancer only) |
+| `/gigs/:id/edit` | Edit Gig | Yes (Freelancer only) |
 
-##  Installation
+## Getting Started
 
-### 1. Clone the Repository
+### Prerequisites
+- Node.js 16 or higher
+- npm or yarn
+
+### Installation
+
 ```bash
-git clone https://github.com/yourusername/skillbridge.git
-cd skillbridge
+# Clone the repository
+git clone https://github.com/olivermooz-117/skrill_bridge_frontend.git
+cd skrill_bridge_frontend
+
+# Install dependencies
+npm install
+
+# Create .env file
+cp .env.example .env
+
+# Edit .env with your API URL
+
+# Run development server
+npm run dev
